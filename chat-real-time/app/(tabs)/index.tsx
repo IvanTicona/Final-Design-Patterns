@@ -26,11 +26,7 @@ export default function HomeScreen() {
         <ArchivedSection />
         <Divider />
         {/* CHATS */}
-        <ChatComponent />
-        <ChatComponent />
-        <ChatComponent />
-        <ChatComponent />
-        <ChatComponent />
+
         <ChatComponent />
         <ChatComponent />
 
@@ -40,4 +36,5 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  
 });

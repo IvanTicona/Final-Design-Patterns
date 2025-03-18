@@ -8,7 +8,7 @@ interface Message {
   room?: string;
 }
 
-const SOCKET_SERVER_URL = 'http://192.168.0.10:3000'; // Cambia esta URL según corresponda
+const SOCKET_SERVER_URL = 'http://10.1.25.3:3000'; // Cambia esta URL según corresponda
 
 const ChatScreen: React.FC = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
