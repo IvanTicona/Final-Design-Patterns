@@ -6,9 +6,8 @@ const http = require('http');
 const cors = require('cors');
 const socketIo = require('socket.io');
 const connectDB = require('./config/db');
+const Conversation = require('./models/Conversation'); // Importa el modelo de Conversación
 
-const Message = require('./models/Message');
-const { generateChatRoomId } = require('./utils/chatUtils');
 
 // Express app
 const app = express();
@@ -28,7 +27,7 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/chats', require('./routes/chat'));
+app.use('/api/conversations', require('./routes/conversations')); // Endpoints de conversaciones
 
 // Routes
 app.get('/', (req, res) => {
@@ -37,28 +36,45 @@ app.get('/', (req, res) => {
 
 // Socket.io
 io.on('connection', (socket) => {
-  console.log(`Nuevo cliente conectado: ${socket.id}`);
+  console.log(`Cliente conectado: ${socket.id}`);
 
-  // Un ejemplo de unirse a una sala (opcional, si manejas chats grupales)
-  socket.on('joinRoom', (room) => {
-    socket.join(room);
-    console.log(`Socket ${socket.id} se unió a la sala ${room}`);
+  // Unir a una sala específica (se espera que se envíe un conversationId válido)
+  socket.on('joinConversation', (conversationId) => {
+    if (!conversationId) {
+      console.log(`No se proporcionó conversationId para el socket ${socket.id}`);
+      return;
+    }
+    socket.join(conversationId);
+    console.log(`Socket ${socket.id} se unió a la conversación ${conversationId}`);
   });
 
-  // Evento para recibir un mensaje desde el cliente
-  socket.on('sendMessage', (data) => {
-    console.log(`Mensaje recibido de ${socket.id}: `, data);
-    // Si el mensaje es para una sala en específico:
-    if (data.room) {
-      // Emite el mensaje a todos los clientes de la sala, excepto al remitente
-      socket.to(data.room).emit('receiveMessage', data);
-    } else {
-      // En caso de ser un mensaje global, emítelo a todos los conectados
-      io.emit('receiveMessage', data);
+  // Manejo del envío de mensajes en tiempo real
+  socket.on('sendMessage', async (data) => {
+    try {
+      // data debe contener: conversationId, sender y content
+      const { conversationId, sender, content } = data;
+      if (!conversationId || !sender || !content) {
+        console.error(`Datos incompletos para enviar mensaje desde ${socket.id}`);
+        return;
+      }
+      
+      // Buscar y actualizar la conversación en la base de datos
+      const conversation = await Conversation.findById(conversationId);
+      if (!conversation) {
+        console.error(`Conversación no encontrada: ${conversationId}`);
+        return;
+      }
+      conversation.messages.push({ sender, content });
+      await conversation.save();
+      
+      // Emitir el mensaje a todos los sockets en la sala
+      io.to(conversationId).emit('receiveMessage', data);
+      console.log(`Mensaje recibido de ${socket.id}: `, data);
+    } catch (error) {
+      console.error('Error en sendMessage: ', error);
     }
   });
 
-  // Evento de desconexión
   socket.on('disconnect', () => {
     console.log(`Cliente desconectado: ${socket.id}`);
   });
