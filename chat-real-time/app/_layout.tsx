@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider, AuthContext } from '@/context/AuthContext';
 import AuthScreen from './AuthScreen';
+import ChatScreen from './chat/ChatScreen';
 
 SplashScreen.preventAutoHideAsync();
 
