@@ -8,7 +8,9 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider, AuthContext } from '@/context/AuthContext';
 import AuthScreen from './AuthScreen';
-import ChatScreen from './chat/ChatScreen';
+import ChatScreen from './ChatScreen';
+import Options from '@/components/chatComponents/Options';
+import MoreOptions from '@/components/chatComponents/MoreOptions';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -21,8 +23,15 @@ function AppNavigator() {
   
   return (
     <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{
+        headerStyle: {backgroundColor: 'white',},
+        headerTintColor: 'black',
+        headerTitle: 'WhatsApp',
+        headerLeft: () => <MoreOptions/>,
+        headerRight: () => <Options/>,
+      }} />
       <Stack.Screen name="+not-found" />
+      <Stack.Screen name="ChatScreen" options={{ headerShown: false }}/>
     </Stack>
   );
 }

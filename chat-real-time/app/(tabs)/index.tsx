@@ -10,11 +10,6 @@ import ChatComponent from '@/components/chatComponents/ChatComponent';
 export default function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1, padding: 15, backgroundColor: '#fff' }}>
-      
-      <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-        <MoreOptions />
-        <Options />
-      </View>
 
       <Text style={{fontSize: 35, fontWeight: 'bold', marginTop: 10}}>Chats</Text>
       

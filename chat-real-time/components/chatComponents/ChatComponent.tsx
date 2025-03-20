@@ -7,7 +7,7 @@ const ChatComponent = () => {
 
   const handleChatPress = () => {
     router.push({
-      pathname: '/chat/ChatScreen',  
+      pathname: '/ChatScreen',  
       params: {
         name: 'Bill Gates',
         profileImage: 'https://www.itedgenews.africa/wp-content/uploads/2020/05/Bill-Gates-1024x683.jpeg', 
