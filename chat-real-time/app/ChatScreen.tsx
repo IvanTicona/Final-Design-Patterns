@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Image, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ChatScreen() {
   const { name, profileImage } = useLocalSearchParams();
@@ -20,7 +21,7 @@ export default function ChatScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="black" />
@@ -76,7 +77,7 @@ export default function ChatScreen() {
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
