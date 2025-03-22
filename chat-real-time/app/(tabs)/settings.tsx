@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Alert } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome, AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { UserContext } from '@/context/UserContext';
 
 const SettingsScreen = () => {
   const [searchText, setSearchText] = useState('');
   const router = useRouter();
+  const { setUserId } = useContext(UserContext);
 
   const handleProfilePress = () => {
     router.push({
@@ -15,6 +18,19 @@ const SettingsScreen = () => {
         profileImage: "https://th.bing.com/th/id/OIP.DoWWfcJ2K5Ei55sBF9xoUgHaHa?rs=1&pid=ImgDetMain", 
       },
     });
+  };
+
+  const handleLogout = async () => {
+    try {
+      // Eliminar userId y token del AsyncStorage
+      await AsyncStorage.removeItem('token');
+      router.navigate('/AuthScreen');
+      
+      Alert.alert('Éxito', 'Has cerrado sesión correctamente');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      Alert.alert('Error', 'Ocurrió un error al cerrar sesión');
+    }
   };
 
   return (
@@ -78,6 +94,10 @@ const SettingsScreen = () => {
         <TouchableOpacity style={styles.option}>
           <FontAwesome name="refresh" size={24} color="#128C7E" />
           <Text style={styles.optionText}>Actualizar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.option} onPress={handleLogout}>
+          <Ionicons name="log-out" size={24} color="#128C7E" />
+          <Text style={styles.optionText}>Cerrar Sesión</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

@@ -10,6 +10,7 @@ import { AuthProvider, AuthContext } from '@/context/AuthContext';
 import AuthScreen from './AuthScreen';
 import Options from '@/components/chatComponents/Options';
 import MoreOptions from '@/components/chatComponents/MoreOptions';
+import { UserProvider } from '@/context/UserContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -49,7 +50,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AuthProvider>
-        <AppNavigator />
+        <UserProvider>
+          <AppNavigator />
+        </UserProvider>
       </AuthProvider>
     </ThemeProvider>
   );

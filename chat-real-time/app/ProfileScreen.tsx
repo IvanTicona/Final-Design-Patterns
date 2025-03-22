@@ -1,38 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  View, Text, TextInput, Image, TouchableOpacity, Alert, StyleSheet, ActivityIndicator 
-} from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, Text, TextInput, Image, Button, StyleSheet, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+// Importamos useLocalSearchParams para obtener los parámetros locales de la ruta
+import { useLocalSearchParams } from 'expo-router';
+import { UserContext } from '@/context/UserContext';
+import { AuthContext } from '@/context/AuthContext';
 
-export default function ProfileScreen() {
-  const router = useRouter();
-  const { name, profileImage } = useLocalSearchParams();
-  console.log(name, profileImage);
+const ProfileScreen = () => {
+  const { profileImage: initialImage, name: initialName } = useLocalSearchParams() as { profileImage: string; name: string };
+  const { userId } = useContext(UserContext); // 🔹 Obtén el userId del contexto
+  const { token } = useContext(AuthContext);
 
-  // Estado de carga inicial
-  const [isLoading, setIsLoading] = useState(true);
+  const [image, setImage] = useState(initialImage);
+  const [nombre, setNombre] = useState(initialName);
+  const [correo, setCorreo] = useState('');
 
-  // Estados de usuario
-  const [nameState, setName] = useState('');
-  const [email, setEmail] = useState('correo@ejemplo.com');
-  const [profileImageState, setProfileImage] = useState('');
+  console.log('Estado:', image, nombre, 'UserID desde contexto:', userId, 'Token:', token);
 
-  // Se ejecuta cuando los parámetros cambian
-  useEffect(() => {
-    if (nameState && profileImageState) {
-      setName(Array.isArray(nameState) ? nameState[0] : nameState);
-      setProfileImage(Array.isArray(profileImageState) ? profileImageState[0] : profileImageState);
-    } else {
-      setName('Usuario');
-      setProfileImage('https://via.placeholder.com/120');
-    }
-    setIsLoading(false); // Marcamos como cargado
-  }, [nameState, profileImageState]);
-
-  // Función para seleccionar imagen desde la galería
+  // Función para seleccionar la imagen de la galería
   const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert('Permiso denegado', 'Necesitamos acceso a la galería para seleccionar la imagen');
+      return;
+    }
+    
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -41,171 +33,131 @@ export default function ProfileScreen() {
     });
 
     if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
-      uploadImage(result.assets[0].uri);
+      setImage(result.assets[0].uri);
     }
   };
 
-  // Subir imagen al backend con Multer
-  const uploadImage = async (imageUri: string) => {
+  const uploadImage = async () => {
+    if (!image) {
+      Alert.alert('Atención', 'Debes seleccionar una imagen primero');
+      return;
+    }
+
+    // Preparar el archivo para el FormData
+    let localUri = image;
+    let filename = (typeof localUri === 'string' ? localUri : '').split('/').pop();
+    let match = filename ? /\.(\w+)$/.exec(filename) : null;
+    let type = match ? `image/${match[1]}` : `image/jpeg`;
+
+    // Crear el objeto FormData y anexar la imagen y el userId
     let formData = new FormData();
     formData.append('profilePicture', {
-      uri: imageUri,
-      name: 'profile.jpg',
-      type: 'image/jpeg',
+      uri: localUri,
+      name: filename,
+      type,
     } as any);
 
+    if (userId) {
+      formData.append('userId', userId);
+    } else {
+      Alert.alert('Error', 'El userId no es válido');
+      return;
+    }
+
     try {
-      const response = await fetch('http://localhost:3000/upload-profile-picture', {
+      const response = await fetch('http://localhost:3000/api/profile/upload-profile-picture', {
         method: 'POST',
         body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
       });
-
+      const data = await response.json();
       if (response.ok) {
-        Alert.alert('Éxito', 'Imagen de perfil actualizada.');
+        Alert.alert('Éxito', 'Imagen de perfil actualizada correctamente');
+        console.log('Respuesta del servidor:', data);
       } else {
-        Alert.alert('Error', 'No se pudo actualizar la imagen.');
+        Alert.alert('Error', data.msg || 'Error al subir la imagen');
+        console.error('Error del servidor:', data);
       }
     } catch (error) {
-      Alert.alert('Error', 'Hubo un problema con la subida de la imagen.');
+      console.error('Error en la solicitud:', error);
+      Alert.alert('Error', 'Ocurrió un error en la solicitud');
     }
   };
-
-  // 🔥 Si está cargando, mostramos un indicador de carga
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#25D366" />
-        <Text style={styles.loadingText}>Cargando perfil...</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={28} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Perfil</Text>
-      </View>
-
-      {/* Imagen de perfil */}
-      <View style={styles.profileContainer}>
-        <TouchableOpacity onPress={pickImage}>
-          <Image source={{ uri: Array.isArray(profileImage) ? profileImage[0] : profileImage }} style={styles.profileImage} />
-          <View style={styles.cameraIcon}>
-            <Ionicons name="camera" size={24} color="white" />
+      <Text style={styles.title}>Perfil</Text>
+      
+      {/* Contenedor de la imagen */}
+      <View style={styles.imageContainer}>
+        {image ? (
+          <Image source={{ uri: image }} style={styles.image} />
+        ) : (
+          <View style={styles.placeholder}>
+            <Text>No hay imagen</Text>
           </View>
-        </TouchableOpacity>
+        )}
       </View>
 
-      {/* Campos de edición */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Nombre</Text>
-        <TextInput
-          style={styles.input}
-          data-value={name}
-          onChangeText={setName}
-          placeholder="Tu nombre"
-        />
-      </View>
+      <Button title="Seleccionar Imagen" onPress={pickImage} />
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Correo electrónico</Text>
-        <TextInput
-          style={styles.input}
-          data-value={email}
-          onChangeText={setEmail}
-          placeholder="Correo electrónico"
-          keyboardType="email-address"
-        />
-      </View>
+      {/* Campos de nombre y correo */}
+      <TextInput
+        style={styles.input}
+        placeholder="Nombre"
+        value={nombre}
+        onChangeText={setNombre}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Correo"
+        value={correo}
+        onChangeText={setCorreo}
+      />
 
-      {/* Botón Guardar */}
-      <TouchableOpacity style={styles.saveButton} onPress={() => Alert.alert('Cambios guardados')}>
-        <Text style={styles.saveButtonText}>Guardar cambios</Text>
-      </TouchableOpacity>
+      <Button title="Actualizar Perfil" onPress={uploadImage} />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
-    paddingHorizontal: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
+    padding: 20,
     alignItems: 'center',
+    justifyContent: 'center'
   },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: 'gray',
+  title: {
+    fontSize: 24,
+    marginBottom: 20
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 15,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginLeft: 15,
-  },
-  profileContainer: {
-    alignItems: 'center',
-    marginVertical: 30,
-  },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 2,
-    borderColor: 'gray',
-  },
-  cameraIcon: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#25D366',
-    padding: 8,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: 'white',
-  },
-  inputContainer: {
+  imageContainer: {
     marginBottom: 20,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    overflow: 'hidden',
+    backgroundColor: '#ddd',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
-  label: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 5,
-    color: 'gray',
+  image: {
+    width: '100%',
+    height: '100%'
+  },
+  placeholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%'
   },
   input: {
-    backgroundColor: 'white',
-    padding: 12,
-    borderRadius: 10,
-    fontSize: 16,
-    elevation: 2,
-  },
-  saveButton: {
-    backgroundColor: '#25D366',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+    width: '100%',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 10
   },
 });
+
+export default ProfileScreen;
