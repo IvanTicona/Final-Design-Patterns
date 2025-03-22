@@ -23,6 +23,9 @@ function AppNavigator() {
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }}/>
+      <Stack.Screen name="AuthScreen" options={{ headerShown: false }}/>
+      <Stack.Screen name="ChatScreen" options={{ headerShown: false}}/>
+      <Stack.Screen name="ProfileScreen" options={{ headerShown: false }}/>
     </Stack>
   );
 }

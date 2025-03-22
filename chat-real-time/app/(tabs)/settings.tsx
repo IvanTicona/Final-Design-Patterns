@@ -8,7 +8,13 @@ const SettingsScreen = () => {
   const router = useRouter();
 
   const handleProfilePress = () => {
-    router.push('/ProfileScreen');
+    router.push({
+      pathname: '/ProfileScreen',  
+      params: {
+        name: "Bill Gates",
+        profileImage: "https://th.bing.com/th/id/OIP.DoWWfcJ2K5Ei55sBF9xoUgHaHa?rs=1&pid=ImgDetMain", 
+      },
+    });
   };
 
   return (
