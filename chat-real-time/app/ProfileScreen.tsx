@@ -3,21 +3,16 @@ import { View, Text, TextInput, Image, Button, StyleSheet, Alert } from 'react-n
 import * as ImagePicker from 'expo-image-picker';
 // Importamos useLocalSearchParams para obtener los parámetros locales de la ruta
 import { useLocalSearchParams } from 'expo-router';
-import { UserContext } from '@/context/UserContext';
 import { AuthContext } from '@/context/AuthContext';
 
 const ProfileScreen = () => {
   const { profileImage: initialImage, name: initialName } = useLocalSearchParams() as { profileImage: string; name: string };
-  const { userId } = useContext(UserContext); // 🔹 Obtén el userId del contexto
-  const { token } = useContext(AuthContext);
-
+  const { user, token } = useContext(AuthContext);
+  const userId = user?._id;
   const [image, setImage] = useState(initialImage);
   const [nombre, setNombre] = useState(initialName);
   const [correo, setCorreo] = useState('');
 
-  console.log('Estado:', image, nombre, 'UserID desde contexto:', userId, 'Token:', token);
-
-  // Función para seleccionar la imagen de la galería
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {

@@ -1,16 +1,11 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useContext } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider, AuthContext } from '@/context/AuthContext';
 import AuthScreen from './AuthScreen';
-import Options from '@/components/chatComponents/Options';
-import MoreOptions from '@/components/chatComponents/MoreOptions';
-import { UserProvider } from '@/context/UserContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,7 +27,6 @@ function AppNavigator() {
 }
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -48,12 +42,8 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AuthProvider>
-        <UserProvider>
-          <AppNavigator />
-        </UserProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <AppNavigator />
+    </AuthProvider>
   );
 }

@@ -1,34 +1,37 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Alert } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome, AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserContext } from '@/context/UserContext';
+import { AuthContext } from '@/context/AuthContext';
 
 const SettingsScreen = () => {
+  const { user, setToken, setUser } = useContext(AuthContext);
   const [searchText, setSearchText] = useState('');
   const router = useRouter();
-  const { setUserId } = useContext(UserContext);
 
   const handleProfilePress = () => {
     router.push({
       pathname: '/ProfileScreen',  
       params: {
-        name: "Bill Gates",
-        profileImage: "https://th.bing.com/th/id/OIP.DoWWfcJ2K5Ei55sBF9xoUgHaHa?rs=1&pid=ImgDetMain", 
+        name: user?.username,
+        profileImage: user?.profilePicture, 
       },
     });
   };
 
   const handleLogout = async () => {
     try {
-      // Eliminar userId y token del AsyncStorage
       await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('user');
+
+      setToken(null);
+      setUser(null);
+
       router.navigate('/AuthScreen');
       
       Alert.alert('Éxito', 'Has cerrado sesión correctamente');
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
       Alert.alert('Error', 'Ocurrió un error al cerrar sesión');
     }
   };
@@ -48,18 +51,18 @@ const SettingsScreen = () => {
       <TouchableOpacity onPress={handleProfilePress}>
         <View style={styles.profileSection}>
             <Image
-            source={{ uri: 'https://th.bing.com/th/id/OIP.Ijpxtc1N0bIpwZDTn0gw5gHaEK?rs=1&pid=ImgDetMain' }} // Aquí debes poner la URL de la foto de perfil
+            source={{ uri: user?.profilePicture }} // Aquí debes poner la URL de la foto de perfil
             style={styles.profileImage}
             />
             <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Bill Gates</Text>
+            <Text style={styles.profileName}>{user?.username}</Text>
             </View>
         </View>
         </TouchableOpacity>
 
       {/* opciones */}
       <View style={styles.optionsContainer}>
-        <TouchableOpacity style={styles.option}>
+        {/* <TouchableOpacity style={styles.option}>
           <Ionicons name="list" size={24} color="#128C7E" />
           <Text style={styles.optionText}>Listas</Text>
         </TouchableOpacity>
@@ -94,7 +97,7 @@ const SettingsScreen = () => {
         <TouchableOpacity style={styles.option}>
           <FontAwesome name="refresh" size={24} color="#128C7E" />
           <Text style={styles.optionText}>Actualizar</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity style={styles.option} onPress={handleLogout}>
           <Ionicons name="log-out" size={24} color="#128C7E" />
           <Text style={styles.optionText}>Cerrar Sesión</Text>

@@ -2,25 +2,17 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, SafeAreaView, View, Text, StyleSheet } from 'react-native';
 
-import { HapticTab } from '@/components/HapticTab';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import Settings from '@/components/ui/Settings';
 import Chats from '@/components/ui/Chats';
 import MoreOptions from '@/components/chatComponents/MoreOptions';
 import Options from '@/components/chatComponents/Options';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: true, // Mantener el encabezado visible
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
             position: 'absolute',

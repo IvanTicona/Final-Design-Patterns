@@ -3,13 +3,11 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
-import { UserContext } from '../context/UserContext';
-
-const API_URL = 'http://192.168.1.201:3000/api/auth';
+import Config from 'react-native-config';
 
 const AuthScreen: React.FC = () => {
-  const { setToken } = useContext(AuthContext);
-  const { setUserId } = useContext(UserContext);
+
+  const { setToken, setUser } = useContext(AuthContext);
   const [isRegister, setIsRegister] = useState<boolean>(false);
   const [username, setUsername] = useState<string>('');
   const [email, setEmail] = useState<string>('');
@@ -18,20 +16,21 @@ const AuthScreen: React.FC = () => {
   const handleAuth = async () => {
     const endpoint = isRegister ? 'register' : 'login';
     try {
-      const response = await axios.post(`${API_URL}${endpoint}`, {
+      const response = await axios.post(`http://192.168.0.17:3000/api/auth/${endpoint}`, {
         username: username.trim(),
         email: email.trim(),
         password: password.trim(),
       });
-      const { token, userId } = response.data;
+
+      const { token, user } = response.data;
+
       await AsyncStorage.setItem('token', token);
-      await AsyncStorage.setItem('userId', userId);
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+
       setToken(token);
-      setUserId(userId);
-      console.log('Respuesta del servidor:', userId);
-      console.log('Respuesta del token:', token);
+      setUser(user);
+      
     } catch (error) {
-      console.error(error);
       Alert.alert('Error', 'Ha ocurrido un error en la autenticación');
     }
   };

@@ -1,37 +1,36 @@
-// AuthContext.tsx
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-interface AuthContextProps {
-  token: string | null;
-  setToken: (token: string | null) => void;
-}
+import { AuthContextProps, AuthProviderProps } from '@/interfaces/Auth';
+import { User } from '@/interfaces/User';
 
 export const AuthContext = createContext<AuthContextProps>({
   token: null,
+  user: null,
   setToken: () => {},
+  setUser: () => {},
 });
-
-interface AuthProviderProps {
-  children: ReactNode;
-}
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Carga el token guardado en AsyncStorage al iniciar la app
     const loadToken = async () => {
-      const storedToken = await AsyncStorage.getItem('token');
-      if (storedToken) {
-        setToken(storedToken);
+      try{
+        const storedToken = await AsyncStorage.getItem('token');
+        const storedUser = await AsyncStorage.getItem('user');
+        if(!storedToken || !storedUser) return;
+        setToken(storedToken!);
+        setUser(JSON.parse(storedUser!));
+      } catch (error) {
+        console.error('Error al cargar el token:', error);
       }
     };
     loadToken();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ token, setToken }}>
+    <AuthContext.Provider value={{ token, user, setToken, setUser }}>
       {children}
     </AuthContext.Provider>
   );
