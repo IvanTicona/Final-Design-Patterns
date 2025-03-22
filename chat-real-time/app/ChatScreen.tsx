@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Image, StyleSheet } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ProfileImage, UserName } from '@/components/chatComponents/ChatHeader';
+import IconButtons from '@/components/chatComponents/IconButtons';
 
 export default function ChatScreen() {
-  const { name, profileImage } = useLocalSearchParams();
+  const { name, profileImage } = useLocalSearchParams() as { name: string; profileImage: string };
   const router = useRouter();
+  const navigation = useNavigation();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
     { id: '1', text: 'Hola! ¿Cómo estás?', sender: 'other' },
@@ -20,27 +22,28 @@ export default function ChatScreen() {
     }
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: true,  
+      headerStyle: { backgroundColor: 'white' },
+      headerTintColor: 'black',
+      headerTitle: () => (
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <ProfileImage uri={profileImage} style={{ width: 40, height: 40, borderRadius: 20 }} />
+          <UserName name={name} style={{ marginLeft: 10, fontSize: 18, fontWeight: 'bold' }} />
+        </View>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: 10 }}>
           <Ionicons name="arrow-back" size={28} color="black" />
         </TouchableOpacity>
-        <Image source={{ uri: typeof profileImage === 'string' ? profileImage : '' }} style={styles.profileImage} />
-        <Text style={styles.userName}>{name}</Text>
-        <View style={styles.icons}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="call" size={28} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="videocam" size={28} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <MaterialIcons name="more-vert" size={28} color="black" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      ),
+      headerRight: () => <IconButtons />,
+    });
+  }, [navigation, name, profileImage]);
 
+  return (
+    <View style={styles.container}>
       <FlatList
         data={messages}
         keyExtractor={(item) => item.id}
@@ -77,7 +80,7 @@ export default function ChatScreen() {
           </TouchableOpacity>
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

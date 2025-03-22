@@ -21,10 +21,6 @@ const UserSchema = new mongoose.Schema({
   date: {
     type: Date,
     default: Date.now
-  },
-  image: {
-    type: String,
-    default: "https://www.pngkey.com/png/full/115-1150152_default-profile-picture-avatar-png-green.png"
   }
 });
 
