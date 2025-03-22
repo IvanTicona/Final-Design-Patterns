@@ -32,6 +32,8 @@ app.use(express.json());
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/conversations", require("./routes/conversations"));
 app.use('/api/upload', require('./routes/upload'));
+app.use('/api/profile', require('./routes/profile'));
+
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
