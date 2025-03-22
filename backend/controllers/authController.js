@@ -20,7 +20,7 @@ exports.registerUser = async (req, res) => {
     const payload = { user: { id: user._id } };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.res(201).json({ token });
+    res.res(201).json({ token, user });
   } catch (error) {
     res.status(500).send('Error en el servidor');
   }
@@ -39,7 +39,7 @@ exports.loginUser = async (req, res) => {
     const payload = { user: { id: user._id } };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(200).json({ token });
+    res.status(200).json({ token, user });
   } catch (error) {
     res.status(500).send('Error en el servidor');
   }
