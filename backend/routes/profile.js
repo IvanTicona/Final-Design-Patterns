@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../middlewares/upload');
-const profileController = require('../controllers/profileController');
+const { uploadProfilePicture } = require('../controllers/profileController');
 
-// Endpoint para subir y actualizar la imagen de perfil
-router.post('/upload-profile-picture', upload.single('profilePicture'), profileController.uploadProfilePicture);
+router.post('/upload-profile-picture', upload.single('profilePicture'), uploadProfilePicture);
 
 module.exports = router;
