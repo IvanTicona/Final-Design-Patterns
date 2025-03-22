@@ -10,8 +10,6 @@ import ChatComponent from '@/components/chatComponents/ChatComponent';
 export default function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1, padding: 15, backgroundColor: '#fff' }}>
-
-      <Text style={{fontSize: 35, fontWeight: 'bold', marginTop: 10}}>Chats</Text>
       
       <TextInput style={{height: 38, borderRadius: 15, padding: 10, marginTop: 10, backgroundColor: '#f6f5f3'}} placeholder="Search" />
       

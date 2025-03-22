@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import React from "react";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 const IconButtons = () => {
   return (
@@ -18,15 +18,15 @@ const IconButtons = () => {
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   icons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-between",
     width: 120,
   },
   iconButton: {
-    padding: 5,
+    padding: 8,
   },
-};
+});
 
 export default IconButtons;

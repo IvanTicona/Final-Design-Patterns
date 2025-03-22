@@ -1,9 +1,10 @@
-import { View, Text } from 'react-native'
+import { View, Text, SafeAreaView } from 'react-native'
 import React from 'react'
 import Svg, { Path } from 'react-native-svg'
 
 const Options = (props: any) => {
   return (
+    <SafeAreaView style={{ height: 30, width: 30, justifyContent: 'center', alignItems: 'flex-end', padding: 12 }}>
 
     <View style={{height: 25, width: 70, display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
       <View style={{height: 30, width: 30, backgroundColor: '#f6f5f3', borderRadius: 25, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
@@ -35,6 +36,7 @@ const Options = (props: any) => {
         </Svg>
       </View>
     </View>
+    </SafeAreaView>
   )
 }
 

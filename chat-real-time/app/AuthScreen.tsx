@@ -5,7 +5,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
 
-const API_URL = 'http://192.168.1.205:3000/api/auth'; // Actualiza con la IP de tu servidor
+const API_URL = 'http://localhost:3000/api/auth'; // Actualiza con la IP de tu servidor
 
 const AuthScreen: React.FC = () => {
   const { setToken } = useContext(AuthContext);

@@ -38,16 +38,64 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// Instanciamos el "ChatServer" (Subject)
-const chatServer = new ChatServer(io);
+app.get('/api/conversations', async (req, res) => {
+  try {
+    const conversations = await Conversation.find();
+    res.json(conversations);
+  }
+  catch (error) {
+    res.status(500).json({ msg: 'Error obteniendo las conversaciones' });
+  }
+});
 
-// Instanciamos el "ConversationService"
-const conversationService = new ConversationService();
+// Socket.io
+io.on('connection', (socket) => {
+  console.log(`Cliente conectado: ${socket.id}`);
 
-// Instanciamos el "MessageObserver" y le pasamos el chatServer y conversationService
-const messageObserver = new MessageObserver(chatServer, conversationService);
+  // Unir a una sala específica (se espera que se envíe un conversationId válido)
+  socket.on('joinConversation', (conversationId) => {
+    if (!conversationId) {
+      console.log(`No se proporcionó conversationId para el socket ${socket.id}`);
+      return;
+    }
+    socket.join(conversationId);
+    console.log(`Socket ${socket.id} se unió a la conversación ${conversationId}`);
+  });
 
-// Arrancamos el servidor
+  // Manejo del envío de mensajes en tiempo real
+  socket.on('sendMessage', async (data) => {
+    try {
+      // data debe contener: conversationId, sender y content
+      const { conversationId, sender, content } = data;
+      if (!conversationId || !sender || !content) {
+        console.error(`Datos incompletos para enviar mensaje desde ${socket.id}`);
+        return;
+      }
+      
+      // Buscar y actualizar la conversación en la base de datos
+      const conversation = await Conversation.findById(conversationId);
+      if (!conversation) {
+        console.error(`Conversación no encontrada: ${conversationId}`);
+        return;
+      }
+      conversation.messages.push({ sender, content });
+      await conversation.save();
+      
+      // Emitir el mensaje a todos los sockets en la sala
+      io.to(conversationId).emit('receiveMessage', data);
+      console.log(`Mensaje recibido de ${socket.id}: `, data);
+    } catch (error) {
+      console.error('Error en sendMessage: ', error);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`Cliente desconectado: ${socket.id}`);
+  });
+});
+
+
+// Server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

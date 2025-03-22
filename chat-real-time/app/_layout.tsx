@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useContext } from 'react';
 import 'react-native-reanimated';
@@ -8,7 +8,6 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider, AuthContext } from '@/context/AuthContext';
 import AuthScreen from './AuthScreen';
-import ChatScreen from './ChatScreen';
 import Options from '@/components/chatComponents/Options';
 import MoreOptions from '@/components/chatComponents/MoreOptions';
 
@@ -23,15 +22,7 @@ function AppNavigator() {
   
   return (
     <Stack>
-      <Stack.Screen name="(tabs)" options={{
-        headerStyle: {backgroundColor: 'white',},
-        headerTintColor: 'black',
-        headerTitle: 'WhatsApp',
-        headerLeft: () => <MoreOptions/>,
-        headerRight: () => <Options/>,
-      }} />
-      <Stack.Screen name="+not-found" />
-      <Stack.Screen name="ChatScreen" options={{ headerShown: false }}/>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }}/>
     </Stack>
   );
 }
