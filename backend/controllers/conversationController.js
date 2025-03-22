@@ -1,9 +1,5 @@
 const Conversation = require('../models/Conversation');
 
-/**
- * Crea o retorna una conversación entre dos usuarios.
- * Se espera recibir en el body: { userId1, userId2 }
- */
 exports.createOrGetConversation = async (req, res) => {
   try {
     const { userId1, userId2 } = req.body;
@@ -28,10 +24,6 @@ exports.createOrGetConversation = async (req, res) => {
   }
 };
 
-/**
- * Obtiene todas las conversaciones en las que participa un usuario.
- * Se espera recibir el userId en req.params.
- */
 exports.getUserConversations = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -45,11 +37,6 @@ exports.getUserConversations = async (req, res) => {
   }
 };
 
-/**
- * Agrega un mensaje a una conversación.
- * Se espera en req.params: { conversationId }
- * y en req.body: { sender, content }
- */
 exports.addMessageToConversation = async (req, res) => {
   try {
     const { conversationId } = req.params;

@@ -1,24 +1,19 @@
 const Conversation = require('../models/Conversation');
 
 class ConversationService {
-  async saveMessage(conversationId, sender, content) {
-    // Busca la conversación en la BD
+  // Método para agregar un mensaje a una conversación existente
+  async addMessageToConversation(conversationId, message) {
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) {
       throw new Error(`Conversación no encontrada: ${conversationId}`);
     }
-
-    // Agrega el mensaje
-    conversation.messages.push({ sender, content });
+    // Agregar el mensaje (el objeto message ya tiene la estructura y propiedades definidas)
+    conversation.messages.push(message);
     await conversation.save();
-
     return conversation;
   }
 
-  // Otros métodos de negocio, por ejemplo:
-  // createOrGetConversation(userId1, userId2) { ... }
-  // getUserConversations(userId) { ... }
-  // etc.
+  // Otros métodos relacionados con las conversaciones…
 }
 
 module.exports = ConversationService;
