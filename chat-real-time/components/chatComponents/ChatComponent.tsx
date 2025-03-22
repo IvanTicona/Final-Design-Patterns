@@ -1,16 +1,21 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 
 const ChatComponent = () => {
   const router = useRouter();
+  const [name, setName] = useState("");
+  const [profileImage, setProfileImage] = useState("");
+  const [lastMessage, setLastMessage] = useState("");
+  const [messages, setMessages] = useState("");
+  
 
   const handleChatPress = () => {
     router.push({
       pathname: '/ChatScreen',  
       params: {
-        name: 'Bill Gates',
-        profileImage: 'https://www.itedgenews.africa/wp-content/uploads/2020/05/Bill-Gates-1024x683.jpeg', 
+        name: "Bill Gates",
+        profileImage: "https://th.bing.com/th/id/OIP.DoWWfcJ2K5Ei55sBF9xoUgHaHa?rs=1&pid=ImgDetMain", 
       },
     });
   };

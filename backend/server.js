@@ -34,6 +34,16 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
+app.get('/api/conversations', async (req, res) => {
+  try {
+    const conversations = await Conversation.find();
+    res.json(conversations);
+  }
+  catch (error) {
+    res.status(500).json({ msg: 'Error obteniendo las conversaciones' });
+  }
+});
+
 // Socket.io
 io.on('connection', (socket) => {
   console.log(`Cliente conectado: ${socket.id}`);
