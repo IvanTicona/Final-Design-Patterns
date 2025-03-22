@@ -3,13 +3,12 @@ const Conversation = require('../models/Conversation');
 exports.createOrGetConversation = async (req, res) => {
   try {
     const { userId1, userId2 } = req.body;
+
     if (!userId1 || !userId2) {
       return res.status(400).json({ msg: 'Debe proporcionar ambos IDs de usuario' });
     }
-    // Ordenar de forma determinista
     const participants = [userId1, userId2].sort();
     
-    // Buscar si ya existe una conversación con estos participantes
     let conversation = await Conversation.findOne({ participants });
     
     if (!conversation) {
@@ -17,22 +16,22 @@ exports.createOrGetConversation = async (req, res) => {
       await conversation.save();
     }
     
-    res.json(conversation);
+    res.status(200).json(conversation);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: 'Error creando o obteniendo la conversación' });
+    res.status(500).json({ msg: 'Error creando u obteniendo la conversación' });
   }
 };
 
 exports.getUserConversations = async (req, res) => {
   try {
     const { userId } = req.params;
+
     const conversations = await Conversation.find({ participants: userId })
       .populate('participants', 'username') // Opcional: para traer datos de los usuarios
       .sort({ updatedAt: -1 });
-    res.json(conversations);
+    
+    res.status(200).json(conversations);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ msg: 'Error obteniendo las conversaciones' });
   }
 };
@@ -53,9 +52,9 @@ exports.addMessageToConversation = async (req, res) => {
     
     conversation.messages.push({ sender, content });
     await conversation.save();
-    res.json(conversation);
+
+    res.status(201).json(conversation);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ msg: 'Error al agregar el mensaje' });
   }
 };
