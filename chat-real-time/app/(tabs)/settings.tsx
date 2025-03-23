@@ -51,7 +51,7 @@ const SettingsScreen = () => {
       <TouchableOpacity onPress={handleProfilePress}>
         <View style={styles.profileSection}>
             <Image
-            source={{ uri: user?.profilePicture }} // Aquí debes poner la URL de la foto de perfil
+            source={{ uri: user?.profilePicture }}
             style={styles.profileImage}
             />
             <View style={styles.profileInfo}>
