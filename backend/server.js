@@ -8,6 +8,7 @@ const socketIo = require("socket.io");
 
 const connectDB = require("./config/db");
 const ChatServer = require("./ChatServer");
+const MessageObserver = require("./observers/MessageObserver");
 
 // Inicializaciones
 const app = express();
@@ -18,6 +19,12 @@ const io = socketIo(server, {
     methods: ["GET", "POST"],
   },
 });
+
+// Instanciar ChatServer (sujeto)
+const chatServer = new ChatServer(io);
+
+// Instanciar MessageObserver para procesar mensajes entrantes
+new MessageObserver(chatServer);
 
 // Conexión a la base de datos
 connectDB();
@@ -34,9 +41,6 @@ app.use('/api/profile', require('./routes/profile'));
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
-
-// Instanciamos el "ChatServer" (Subject)
-const chatServer = new ChatServer(io);
 
 // Arrancamos el servidor
 const PORT = process.env.PORT || 3000;

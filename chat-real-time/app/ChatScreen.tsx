@@ -1,26 +1,46 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useState, useContext, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Image, StyleSheet } from 'react-native';
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { ProfileImage, UserName } from '@/components/chatComponents/ChatHeader';
 import IconButtons from '@/components/chatComponents/IconButtons';
+import { AuthContext } from '@/context/AuthContext';
+import axios from 'axios';
 
-export default function ChatScreen() {
+const ChatScreen = () => {
   const { name, profileImage } = useLocalSearchParams() as { name: string; profileImage: string };
   const router = useRouter();
   const navigation = useNavigation();
+
+  const { user } = useContext(AuthContext);
+  const UserID = user?._id;
+
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
-    { id: '1', text: 'Hola! ¿Cómo estás?', sender: 'other' },
-    { id: '2', text: 'Hola! Todo bien, ¿y tú?', sender: 'me' },
+    { _id: '', sender: '', content: '' },
   ]);
 
-  const sendMessage = () => {
-    if (message.trim().length > 0) {
-      setMessages([...messages, { id: Date.now().toString(), text: message, sender: 'me' }]);
-      setMessage('');
-    }
-  };
+  // const sendMessage = () => {
+  //   if (message.trim().length > 0) {
+  //     setMessages([...messages, { _id: Date.now().toString(), text: message, sender: 'me' }]);
+  //     setMessage('');
+  //   }
+  // };
+
+  useEffect(() => {
+
+    const loadMessages = async () => {
+      try{
+        const response = await axios.get('http://192.168.0.17:3000/api/conversations/conversation/67df66fc8feaf861786757f3');
+        const messagesFromData = response.data.messages;
+        setMessages(messagesFromData);
+      }catch(error){
+        console.error(error);
+      }
+    };
+
+    loadMessages();
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -46,10 +66,10 @@ export default function ChatScreen() {
     <View style={styles.container}>
       <FlatList
         data={messages}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <View style={[styles.messageContainer, item.sender === 'me' ? styles.myMessage : styles.otherMessage]}>
-            <Text style={styles.messageText}>{item.text}</Text>
+          <View style={[styles.messageContainer, item.sender === UserID ? styles.myMessage : styles.otherMessage]}>
+            <Text style={styles.messageText}>{item.content}</Text>
           </View>
         )}
       />
@@ -146,6 +166,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#ddd',
     backgroundColor: 'white',
+    marginBottom: 20,
   },
   input: {
     flex: 1,
@@ -158,3 +179,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#f6f6f6',
   },
 });
+
+export default ChatScreen;

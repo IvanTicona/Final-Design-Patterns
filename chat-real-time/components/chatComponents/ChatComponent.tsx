@@ -1,6 +1,7 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useRouter } from 'expo-router';
+import { AuthContext } from '@/context/AuthContext';
 
 interface ChatComponentProps {
   profilePicture: string;
@@ -9,13 +10,14 @@ interface ChatComponentProps {
 
 const ChatComponent: React.FC<ChatComponentProps> = ({ profilePicture, username }) => {
   const router = useRouter();
+  const { user } = useContext(AuthContext);
 
   const handleChatPress = () => {
     router.push({
-      pathname: '/ChatScreen',  
+      pathname: '/ChatScreen',
       params: {
-        name: "Bill Gates",
-        profileImage: "https://th.bing.com/th/id/OIP.DoWWfcJ2K5Ei55sBF9xoUgHaHa?rs=1&pid=ImgDetMain", 
+        name: username,
+        profileImage: profilePicture, 
       },
     });
   };
