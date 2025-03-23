@@ -27,9 +27,8 @@ export default function HomeScreen() {
           return {
             conversationId: otherParticipant._id,
             participant: otherParticipant.username,
-            // Puedes agregar más campos, por ejemplo, el último mensaje, fecha, etc.
-            // lastMessage: conv.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null,
-            // updatedAt: conv.updatedAt
+            // lastMessage: otherParticipant.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null,
+            // updatedAt: otherParticipant.updatedAt
             profileImage: otherParticipant.profilePicture
           };
         });

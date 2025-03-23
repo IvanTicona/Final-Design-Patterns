@@ -7,9 +7,7 @@ const cors = require("cors");
 const socketIo = require("socket.io");
 
 const connectDB = require("./config/db");
-const ConversationService = require("./services/ConversationService");
 const ChatServer = require("./ChatServer");
-const MessageObserver = require("./observers/MessageObserver");
 
 // Inicializaciones
 const app = express();
@@ -40,12 +38,6 @@ app.get("/", (req, res) => {
 
 // Instanciamos el "ChatServer" (Subject)
 const chatServer = new ChatServer(io);
-
-// Instanciamos el "ConversationService"
-const conversationService = new ConversationService();
-
-// Instanciamos el "MessageObserver" y le pasamos el chatServer y conversationService
-const messageObserver = new MessageObserver(chatServer, conversationService);
 
 // Arrancamos el servidor
 const PORT = process.env.PORT || 3000;
