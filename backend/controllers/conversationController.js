@@ -70,3 +70,18 @@ exports.addMessageToConversation = async (req, res) => {
     res.status(500).json({ msg: 'Error al agregar el mensaje' });
   }
 };
+
+exports.getConversation = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return res.status(404).json({ msg: 'Conversación no encontrada' });
+    }
+
+    res.status(200).json(conversation);
+  } catch (error) {
+    res.status(500).json({ msg: 'Error obteniendo la conversación' });
+  }
+}

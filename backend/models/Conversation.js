@@ -9,11 +9,11 @@ const ParticipantSchema = new mongoose.Schema({
 const MessageSchema = new mongoose.Schema({
   sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   content: { type: String, required: true },
+  type: { type: String, required: true },
   timestamp: { type: Date, default: Date.now }
 });
 
 const ConversationSchema = new mongoose.Schema({
-  // Aquí se guarda la información denormalizada de cada participante
   participants: [ParticipantSchema],
   messages: [MessageSchema]
 }, { timestamps: true });

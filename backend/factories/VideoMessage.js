@@ -2,8 +2,7 @@ const Message = require('./Message');
 
 class VideoMessage extends Message {
   constructor(options) {
-    super(options);
-    this.videoUrl = options.videoUrl;
+    super({ ...options, type: 'video' });
     this.resolution = options.resolution || '720p';
   }
 

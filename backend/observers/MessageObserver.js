@@ -1,32 +1,24 @@
-const MessageFactory = require('../factories/MessageFactory'); // Ruta según tu estructura
-const ConversationService = require('../services/ConversationService');
+const MessageFactory = require('../factories/MessageFactory');
+const conversationService = require('../services/ConversationService');
 
 class MessageObserver {
-  constructor(chatServer, conversationService) {
+  constructor(chatServer) {
     this.chatServer = chatServer;
-    this.conversationService = conversationService;
-    // Se suscribe al evento 'messageReceived' del ChatServer
+    // Se suscribe al evento "messageReceived"
     this.chatServer.on('messageReceived', this.onMessageReceived.bind(this));
   }
 
   async onMessageReceived(data) {
     try {
-      // Se espera que data tenga: conversationId, sender, content, type
       const { conversationId, sender, content, type } = data;
-      if (!conversationId || !sender || !content || !type) {
-        console.error('Datos incompletos en el mensaje recibido:', data);
-        return;
-      }
-
-      // Crear el objeto mensaje usando el factory
+      // Crea el objeto mensaje según el tipo usando el Factory
       const message = MessageFactory.createMessage(type, { sender, content });
-
-      // Guardar el mensaje en la conversación (mediante el servicio de conversaciones)
-      await this.conversationService.addMessageToConversation(conversationId, message);
-
-      // Emitir el mensaje a todos los sockets en la sala correspondiente
-      this.chatServer.io.to(conversationId).emit('receiveMessage', message);
-      console.log(`Mensaje procesado y enviado: ${message.getType()}`, message);
+      // Guarda el mensaje en la conversación
+      const conversation = await conversationService.addMessageToConversation(conversationId, message);
+      // Emite el mensaje a todos los clientes conectados a esa sala
+      const lastMessage = conversation.messages[conversation.messages.length - 1];
+      this.chatServer.io.to(conversationId).emit('receiveMessage', lastMessage);
+      console.log(`Mensaje procesado y emitido: ${message.getType()}`);
     } catch (error) {
       console.error('Error en MessageObserver:', error);
     }
