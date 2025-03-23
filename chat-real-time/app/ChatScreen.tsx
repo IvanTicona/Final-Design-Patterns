@@ -23,6 +23,13 @@ const ChatScreen = () => {
 
   const socketRef = useRef<any>(null);
 
+  const onCameraPress = () => {
+    router.push({
+      pathname: './CallScreen',
+      params: { UserID },
+    });
+  };
+
   useEffect(() => {
     const loadMessages = async () => {
       try {
@@ -110,7 +117,7 @@ const ChatScreen = () => {
           value={message}
           onChangeText={setMessage}
         />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onCameraPress}>
           <Ionicons name="camera" size={24} color="gray" />
         </TouchableOpacity>
         {message.trim().length > 0 ? (

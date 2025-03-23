@@ -20,6 +20,7 @@ const io = socketIo(server, {
   },
 });
 
+
 // Instanciar ChatServer (sujeto)
 const chatServer = new ChatServer(io);
 
