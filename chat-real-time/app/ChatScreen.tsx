@@ -26,7 +26,7 @@ const ChatScreen = () => {
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const response = await axios.get(`http://192.168.0.17:3000/api/conversations/conversation/${conversationId}`);
+        const response = await axios.get(`http://192.168.1.215:3000/api/conversations/conversation/${conversationId}`);
         const messagesFromData = response.data.messages;
         setMessages(messagesFromData);
       } catch (error) {
@@ -38,7 +38,7 @@ const ChatScreen = () => {
   }, [conversationId]);
 
   useEffect(() => {
-    const socket = io("http://192.168.0.17:3000");
+    const socket = io("http://192.168.1.215:3000");
     socketRef.current = socket;
 
     socket.emit("joinConversation", conversationId);

@@ -16,7 +16,7 @@ const AuthScreen: React.FC = () => {
   const handleAuth = async () => {
     const endpoint = isRegister ? 'register' : 'login';
     try {
-      const response = await axios.post(`http://192.168.0.17:3000/api/auth/${endpoint}`, {
+      const response = await axios.post(`http://192.168.1.215:3000/api/auth/${endpoint}`, {
         username: username.trim(),
         email: email.trim(),
         password: password.trim(),
