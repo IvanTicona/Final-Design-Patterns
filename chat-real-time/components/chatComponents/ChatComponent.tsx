@@ -2,13 +2,13 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 
-const ChatComponent = () => {
+interface ChatComponentProps {
+  profilePicture: string;
+  username: string;
+}
+
+const ChatComponent: React.FC<ChatComponentProps> = ({ profilePicture, username }) => {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [profileImage, setProfileImage] = useState("");
-  const [lastMessage, setLastMessage] = useState("");
-  const [messages, setMessages] = useState("");
-  
 
   const handleChatPress = () => {
     router.push({
@@ -27,11 +27,11 @@ const ChatComponent = () => {
     >
       <Image
         style={{ width: 60, height: 60, borderRadius: 50 }}
-        source={require('../../assets/images/chatProfile.png')}
+        source={{ uri: profilePicture }}
       />
       <View style={{ display: 'flex', flexDirection: 'column', width: '80%', height: 60 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Bill Gates</Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{username}</Text>
           <Text style={{ fontSize: 16, color: '#1faa5f' }}>12:00 PM</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 5 }}>

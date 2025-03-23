@@ -1,3 +1,4 @@
+import { useState, useEffect, useContext } from 'react';
 import ArchivedSection from '@/components/chatComponents/ArchivedSection';
 import FilterSection from '@/components/chatComponents/FilterSection';
 import Divider from '@/components/chatComponents/Divider';
@@ -6,8 +7,41 @@ import Options from '@/components/chatComponents/Options';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ChatComponent from '@/components/chatComponents/ChatComponent';
+import axios from 'axios';
+import { AuthContext } from '../../context/AuthContext';
 
 export default function HomeScreen() {
+
+  const { user } = useContext(AuthContext);
+  const [chats, setChats] = useState([]);
+
+  useEffect(() => {
+
+    const loadChats = async () => {
+      try{
+        const response = await axios.get('http://192.168.0.17:3000/api/conversations/67df11d424b330e27b543841');
+        const savedChats = response.data.map((conv: any) => {
+          const otherParticipant = conv.participants.find(
+            (participant: any) => participant._id.toString() !== user?._id.toString()
+          );
+          return {
+            conversationId: otherParticipant._id,
+            participant: otherParticipant.username,
+            // Puedes agregar más campos, por ejemplo, el último mensaje, fecha, etc.
+            // lastMessage: conv.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null,
+            // updatedAt: conv.updatedAt
+            profileImage: otherParticipant.profilePicture
+          };
+        });
+
+        setChats(savedChats);
+      }catch(error){
+        console.error(error);
+      }
+    };
+    loadChats();
+  },[]);
+
   return (
     <SafeAreaView style={{ flex: 1, padding: 15, backgroundColor: '#fff' }}>
       
@@ -18,11 +52,12 @@ export default function HomeScreen() {
       <View style={{height: '100%', width: '100%', marginTop: 10}}>
         <ArchivedSection />
         <Divider />
-        {/* CHATS */}
-
-        <ChatComponent />
-        <ChatComponent />
-
+        {
+          chats.map((chat: any) => {
+            return(
+            <ChatComponent key={chat.conversationId} profilePicture={chat.profileImage} username={chat.participant} />
+          )})
+        }
       </View>
     </SafeAreaView>
   );

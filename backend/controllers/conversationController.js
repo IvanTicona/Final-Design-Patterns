@@ -1,4 +1,5 @@
 const Conversation = require('../models/Conversation');
+const User = require('../models/User');
 
 exports.createOrGetConversation = async (req, res) => {
   try {
@@ -7,12 +8,25 @@ exports.createOrGetConversation = async (req, res) => {
     if (!userId1 || !userId2) {
       return res.status(400).json({ msg: 'Debe proporcionar ambos IDs de usuario' });
     }
-    const participants = [userId1, userId2].sort();
-    
-    let conversation = await Conversation.findOne({ participants });
-    
+    const participantsSorted = [userId1, userId2].sort();    
+
+    let conversation = await Conversation.findOne({
+      "participants._id": { $all: participantsSorted }
+    });
+
     if (!conversation) {
-      conversation = new Conversation({ participants, messages: [] });
+      const participantData = await Promise.all(
+        [userId1, userId2].map(async (id) => {
+          const user = await User.findById(id);
+          return {
+            _id: user._id,
+            username: user.username,
+            profilePicture: user.profilePicture
+          };
+        })
+      );
+
+      conversation = new Conversation({ participants: participantData, messages: [] });
       await conversation.save();
     }
     
@@ -26,9 +40,7 @@ exports.getUserConversations = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const conversations = await Conversation.find({ participants: userId })
-      .populate('participants', 'username') // Opcional: para traer datos de los usuarios
-      .sort({ updatedAt: -1 });
+    const conversations = await Conversation.find({ "participants._id": userId });
     
     res.status(200).json(conversations);
   } catch (error) {

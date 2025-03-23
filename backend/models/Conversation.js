@@ -1,5 +1,11 @@
 const mongoose = require('mongoose');
 
+const ParticipantSchema = new mongoose.Schema({
+  _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  username: { type: String, required: true },
+  profilePicture: { type: String, default: '' }
+});
+
 const MessageSchema = new mongoose.Schema({
   sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   content: { type: String, required: true },
@@ -7,8 +13,8 @@ const MessageSchema = new mongoose.Schema({
 });
 
 const ConversationSchema = new mongoose.Schema({
-  // Almacena los dos participantes; para evitar duplicados, se debe asegurar que se guarden de forma ordenada.
-  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
+  // Aquí se guarda la información denormalizada de cada participante
+  participants: [ParticipantSchema],
   messages: [MessageSchema]
 }, { timestamps: true });
 

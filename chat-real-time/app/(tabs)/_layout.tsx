@@ -12,7 +12,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true, // Mantener el encabezado visible
+        headerShown: true,
         tabBarStyle: Platform.select({
           ios: {
             position: 'absolute',
@@ -39,12 +39,6 @@ export default function TabLayout() {
           ),
           headerLeft: () => <MoreOptions />,
           headerRight: () => <Options />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
         }}
       />
       <Tabs.Screen
