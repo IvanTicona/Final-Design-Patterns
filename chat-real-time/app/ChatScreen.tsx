@@ -1,11 +1,12 @@
-import React, { useLayoutEffect, useState, useContext, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, Image, StyleSheet } from 'react-native';
-import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import React, { useLayoutEffect, useState, useContext, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { ProfileImage, UserName } from '@/components/chatComponents/ChatHeader';
 import IconButtons from '@/components/chatComponents/IconButtons';
 import { AuthContext } from '@/context/AuthContext';
 import axios from 'axios';
+import io from 'socket.io-client';
 
 const ChatScreen = () => {
   const { name, profileImage } = useLocalSearchParams() as { name: string; profileImage: string };
@@ -15,36 +16,58 @@ const ChatScreen = () => {
   const { user } = useContext(AuthContext);
   const UserID = user?._id;
 
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([
-    { _id: '', sender: '', content: '' },
-  ]);
+  const conversationId = "67df66fc8feaf861786757f3";
 
-  // const sendMessage = () => {
-  //   if (message.trim().length > 0) {
-  //     setMessages([...messages, { _id: Date.now().toString(), text: message, sender: 'me' }]);
-  //     setMessage('');
-  //   }
-  // };
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<any[]>([]);
+
+  const socketRef = useRef<any>(null);
 
   useEffect(() => {
-
     const loadMessages = async () => {
-      try{
-        const response = await axios.get('http://192.168.0.17:3000/api/conversations/conversation/67df66fc8feaf861786757f3');
+      try {
+        const response = await axios.get(`http://192.168.0.17:3000/api/conversations/conversation/${conversationId}`);
         const messagesFromData = response.data.messages;
         setMessages(messagesFromData);
-      }catch(error){
+      } catch (error) {
         console.error(error);
       }
     };
 
     loadMessages();
-  }, []);
+  }, [conversationId]);
+
+  useEffect(() => {
+    const socket = io("http://192.168.0.17:3000");
+    socketRef.current = socket;
+
+    socket.emit("joinConversation", conversationId);
+
+    socket.on("receiveMessage", (data: any) => {
+      setMessages(prevMessages => [...prevMessages, data]);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [conversationId]);
+
+  const sendMessage = () => {
+    if (message.trim().length > 0 && socketRef.current) {
+      const messagePayload = {
+        conversationId,
+        sender: UserID,
+        content: message,
+        type: "text"
+      };
+      socketRef.current.emit("sendMessage", messagePayload);
+      setMessage('');
+    }
+  };  
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerShown: true,  
+      headerShown: true,
       headerStyle: { backgroundColor: 'white' },
       headerTintColor: 'black',
       headerTitle: () => (
@@ -102,42 +125,12 @@ const ChatScreen = () => {
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f2f2f2',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    elevation: 3, 
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginLeft: 10,
-  },
-  userName: {
-    flex: 1,
-    color: 'black',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 10,
-  },
-  icons: {
-    flexDirection: 'row',
-    gap: 15,
-  },
-  iconButton: {
-    padding: 5,
-    backgroundColor: '#d0d0d0', 
-    borderRadius: 50,
   },
   messageContainer: {
     maxWidth: '70%',
@@ -147,12 +140,12 @@ const styles = StyleSheet.create({
   },
   myMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#d0fdd7', 
+    backgroundColor: '#d0fdd7',
     marginRight: 10,
   },
   otherMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#e5e5e5', 
+    backgroundColor: '#e5e5e5',
     marginLeft: 10,
   },
   messageText: {
