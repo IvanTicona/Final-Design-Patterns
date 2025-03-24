@@ -1,42 +1,62 @@
-import { getSocket } from "../utils/socket";
-import { env } from "@/constants/environment";
+import SocketService from '@/utils/SocketService';
 
 class ChatMediator {
-  private socket = getSocket();
+  private static instance: ChatMediator;
   private observers: ((message: any) => void)[] = [];
 
-  constructor() {
-    // Listener para recibir mensajes y notificar a observadores
-    this.socket.on("receiveMessage", (message) => {
-      console.log("Mediator: received message", message);
+  private constructor() {
+    // Al instanciar el mediador, conectamos el socket y escuchamos 'receiveMessage'
+    const socketService = SocketService.getInstance();
+    socketService.connect();
+
+    socketService.on('receiveMessage', (message) => {
       this.notifyObservers(message);
     });
   }
 
-  subscribe(observer: (message: any) => void) {
+  public static getInstance(): ChatMediator {
+    if (!ChatMediator.instance) {
+      ChatMediator.instance = new ChatMediator();
+    }
+    return ChatMediator.instance;
+  }
+
+  // Suscribir un observer (ej: ChatScreen) para recibir mensajes
+  public subscribe(observer: (message: any) => void) {
     this.observers.push(observer);
   }
 
-  unsubscribe(observer: (message: any) => void) {
+  // Desuscribir un observer
+  public unsubscribe(observer: (message: any) => void) {
     this.observers = this.observers.filter((obs) => obs !== observer);
   }
 
   private notifyObservers(message: any) {
-    this.observers.forEach((observer) => observer(message));
+    this.observers.forEach((obs) => obs(message));
   }
 
-  sendMessage(conversationId: string, sender: string, content: string) {
-    this.socket.emit("sendMessage", { conversationId, sender, content, type: "text" });
+  // Unirse a una conversación
+  public joinConversation(conversationId: string) {
+    const socketService = SocketService.getInstance();
+    socketService.emit('joinConversation', conversationId);
   }
 
-  joinConversation(conversationId: string) {
-    this.socket.emit("joinConversation", conversationId);
+  // Salir de una conversación
+  public leaveConversation(conversationId: string) {
+    const socketService = SocketService.getInstance();
+    socketService.emit('leaveConversation', conversationId);
   }
 
-  disconnect() {
-    this.socket.disconnect();
+  // Enviar un mensaje
+  public sendMessage(conversationId: string, sender: string, content: string) {
+    const socketService = SocketService.getInstance();
+    socketService.emit('sendMessage', {
+      conversationId,
+      sender,
+      content,
+      type: 'text',
+    });
   }
 }
 
-const chatMediator = new ChatMediator();
-export default chatMediator;
+export default ChatMediator.getInstance();

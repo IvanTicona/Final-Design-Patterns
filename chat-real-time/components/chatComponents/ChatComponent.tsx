@@ -40,11 +40,11 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ profilePicture, username,
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 5 }}>
           
-          <Text style={{ fontSize: 16, color: '#696969' }}>Hello, how are you?</Text>
+          <Text style={{ fontSize: 16, color: '#696969' }}>Presiona para chatear</Text>
           
-          <View style={{ width: 25, height: 25, backgroundColor: '#1faa5f', borderRadius: 15, alignItems: 'center', justifyContent: 'center' }}>
+          {/* <View style={{ width: 25, height: 25, backgroundColor: '#1faa5f', borderRadius: 15, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ fontSize: 15, color: 'white' }}>5</Text>
-          </View>
+          </View> */}
         </View>
       </View>
     </TouchableOpacity>

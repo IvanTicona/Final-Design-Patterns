@@ -18,7 +18,8 @@ app.use(cors());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/conversations', require('./routes/conversations'));
 app.use('/api/file', require('./routes/file'));
-app.use('/api/profile', require('./routes/profile')); // [Cambio] se incluye la ruta de perfil
+app.use('/api/profile', require('./routes/profile'));
+app.use('/api/users', require('./routes/users'));
 
 app.get('/', (req, res) => {
   res.send('API de Chat en Tiempo Real está corriendo');

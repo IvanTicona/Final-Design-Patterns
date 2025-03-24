@@ -12,6 +12,7 @@ export default {
       API_AUTH: process.env.API_AUTH,
       API_CONVERSATION: process.env.API_CONVERSATION,
       API_PROFILE_PICTURE: process.env.API_PROFILE_PICTURE,
+      API_USERS: process.env.API_USERS,
     },
   },
 };
