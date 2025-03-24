@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const Conversation = require('../models/Conversation'); // <-- Agregado
+const { Types } = require('mongoose');
 
 exports.uploadProfilePicture = async (req, res) => {
   try {
@@ -23,10 +25,12 @@ exports.uploadProfilePicture = async (req, res) => {
       return res.status(404).json({ msg: 'Usuario no encontrado' });
     }
 
+    const userObjId = new Types.ObjectId(userId);
+
     await Conversation.updateMany(
-      { "participants._id": userId },
+      { "participants._id": userObjId },
       { $set: { "participants.$[elem].profilePicture": fileUrl } },
-      { arrayFilters: [{ "elem._id": userId }] }
+      { arrayFilters: [{ "elem._id": userObjId }] }
     );
 
     return res.status(201).json({
@@ -34,6 +38,7 @@ exports.uploadProfilePicture = async (req, res) => {
       user: updatedUser
     });
   } catch (error) {
-    return res.status(500).json({ msg: 'Error interno del servidor' });
+    console.error('Error al actualizar imagen de perfil:', error);
+    return res.status(500).json({ msg: 'DORIAN Error interno del servidor' });
   }
 };
