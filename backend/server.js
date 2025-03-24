@@ -1,48 +1,42 @@
-require("dotenv").config();
+require('dotenv').config();
+const express = require('express');
+const http = require('http');
+const cors = require('cors');
+const socketIo = require('socket.io');
+const mongoose = require('mongoose');
+const connectDB = require('./config/db');
 
-// Dependencias
-const express = require("express");
-const http = require("http");
-const cors = require("cors");
-const socketIo = require("socket.io");
-
-const connectDB = require("./config/db");
-const ChatServer = require("./ChatServer");
-const MessageObserver = require("./observers/MessageObserver");
-
-// Inicializaciones
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
-
-// Instanciar ChatServer (sujeto)
-const chatServer = new ChatServer(io);
-
-// Instanciar MessageObserver para procesar mensajes entrantes
-new MessageObserver(chatServer);
-
-// Conexión a la base de datos
+// Conectar a MongoDB
 connectDB();
 
-// Middlewares
-app.use(cors());
+// Configurar Express
+const app = express();
 app.use(express.json());
+app.use(cors());
 
 // Rutas
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/conversations", require("./routes/conversations"));
-app.use('/api/profile', require('./routes/profile'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/conversations', require('./routes/conversations'));
+app.use('/api/file', require('./routes/file'));
+app.use('/api/profile', require('./routes/profile')); // [Cambio] se incluye la ruta de perfil
 
-app.get("/", (req, res) => {
-  res.send("API is running...");
+app.get('/', (req, res) => {
+  res.send('API de Chat en Tiempo Real está corriendo');
 });
 
-// Arrancamos el servidor
+// Crear servidor HTTP y configurar Socket.IO
+const server = http.createServer(app);
+const io = socketIo(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
+
+// Instanciar ChatServer (Observer)
+const ChatServer = require('./ChatServer');
+const chatServer = new ChatServer(io);
+
+// Instanciar MessageObserver (Observer + Command)
+const MessageObserver = require('./observers/MessageObserver');
+new MessageObserver(chatServer);
+
+// Iniciar el servidor
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

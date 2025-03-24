@@ -4,12 +4,11 @@ const User = require('../models/User');
 exports.createOrGetConversation = async (req, res) => {
   try {
     const { userId1, userId2 } = req.body;
-
     if (!userId1 || !userId2) {
       return res.status(400).json({ msg: 'Debe proporcionar ambos IDs de usuario' });
     }
-    const participantsSorted = [userId1, userId2].sort();    
 
+    const participantsSorted = [userId1, userId2].sort();
     let conversation = await Conversation.findOne({
       "participants._id": { $all: participantsSorted }
     });
@@ -25,26 +24,25 @@ exports.createOrGetConversation = async (req, res) => {
           };
         })
       );
-
       conversation = new Conversation({ participants: participantData, messages: [] });
       await conversation.save();
     }
     
-    res.status(200).json(conversation);
+    return res.status(200).json(conversation);
   } catch (error) {
-    res.status(500).json({ msg: 'Error creando u obteniendo la conversación' });
+    console.error('Error creando u obteniendo la conversación:', error);
+    return res.status(500).json({ msg: 'Error creando u obteniendo la conversación' });
   }
 };
 
 exports.getUserConversations = async (req, res) => {
   try {
     const { userId } = req.params;
-
     const conversations = await Conversation.find({ "participants._id": userId });
-    
-    res.status(200).json(conversations);
+    return res.status(200).json(conversations);
   } catch (error) {
-    res.status(500).json({ msg: 'Error obteniendo las conversaciones' });
+    console.error('Error obteniendo conversaciones:', error);
+    return res.status(500).json({ msg: 'Error obteniendo las conversaciones' });
   }
 };
 
@@ -52,36 +50,36 @@ exports.addMessageToConversation = async (req, res) => {
   try {
     const { conversationId } = req.params;
     const { sender, content } = req.body;
-    
+
     if (!sender || !content) {
       return res.status(400).json({ msg: 'Falta el remitente o contenido del mensaje' });
     }
-    
+
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) {
       return res.status(404).json({ msg: 'Conversación no encontrada' });
     }
-    
-    conversation.messages.push({ sender, content });
+
+    conversation.messages.push({ sender, content, type: 'text' });
     await conversation.save();
 
-    res.status(201).json(conversation);
+    return res.status(201).json(conversation);
   } catch (error) {
-    res.status(500).json({ msg: 'Error al agregar el mensaje' });
+    console.error('Error al agregar el mensaje:', error);
+    return res.status(500).json({ msg: 'Error al agregar el mensaje' });
   }
 };
 
 exports.getConversation = async (req, res) => {
   try {
     const { conversationId } = req.params;
-
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) {
       return res.status(404).json({ msg: 'Conversación no encontrada' });
     }
-
-    res.status(200).json(conversation);
+    return res.status(200).json(conversation);
   } catch (error) {
-    res.status(500).json({ msg: 'Error obteniendo la conversación' });
+    console.error('Error obteniendo la conversación:', error);
+    return res.status(500).json({ msg: 'Error obteniendo la conversación' });
   }
-}
+};

@@ -1,8 +1,9 @@
 const Conversation = require('../models/Conversation');
 
 class ConversationService {
-  async createOrGetConversation(userDataArray) {
-    const sortedParticipants = userDataArray.sort((a, b) =>
+  // Crea o retorna una conversación entre participantes denormalizados
+  async createOrGetConversation(participantsData) {
+    const sortedParticipants = participantsData.sort((a, b) =>
       a._id.toString().localeCompare(b._id.toString())
     );
     const participantIds = sortedParticipants.map(p => p._id);
@@ -21,6 +22,7 @@ class ConversationService {
     return conversation;
   }
 
+  // Agrega un mensaje a la conversación
   async addMessageToConversation(conversationId, message) {
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) {
@@ -37,6 +39,7 @@ class ConversationService {
     return conversation;
   }
 
+  // Obtiene todas las conversaciones de un usuario
   async getUserConversations(userId) {
     return await Conversation.find({ "participants._id": userId });
   }
