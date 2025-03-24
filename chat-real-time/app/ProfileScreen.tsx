@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { env } from '@/constants/environment';
 
 const ProfileScreen = () => {
   const { user, setUser, token } = useContext(AuthContext);
@@ -75,7 +76,7 @@ const ProfileScreen = () => {
     }
 
     try {
-      const response = await fetch('http://192.168.1.215:3000/api/profile/upload-profile-picture', {
+      const response = await fetch(`${env.API_PROFILE_PICTURE}`, {
         method: 'POST',
         body: formData,
       });
