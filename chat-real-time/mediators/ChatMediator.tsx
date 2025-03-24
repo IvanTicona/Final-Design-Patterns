@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client";
+import { env } from "@/constants/environment";
 
 class ChatMediator {
   private socket: Socket;
@@ -39,5 +40,5 @@ class ChatMediator {
   }
 }
 
-const chatMediator = new ChatMediator("http://192.168.1.215:3000");
+const chatMediator = new ChatMediator(`${env.SERVER}`);
 export default chatMediator;
