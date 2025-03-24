@@ -23,9 +23,17 @@ exports.uploadProfilePicture = async (req, res) => {
       return res.status(404).json({ msg: 'Usuario no encontrado' });
     }
 
-    return res.status(201).json({ msg: 'Imagen de perfil actualizada correctamente', user: updatedUser });
+    await Conversation.updateMany(
+      { "participants._id": userId },
+      { $set: { "participants.$[elem].profilePicture": fileUrl } },
+      { arrayFilters: [{ "elem._id": userId }] }
+    );
+
+    return res.status(201).json({
+      msg: 'Imagen de perfil actualizada correctamente',
+      user: updatedUser
+    });
   } catch (error) {
-    console.error('Error interno al actualizar la imagen de perfil:', error);
     return res.status(500).json({ msg: 'Error interno del servidor' });
   }
 };
