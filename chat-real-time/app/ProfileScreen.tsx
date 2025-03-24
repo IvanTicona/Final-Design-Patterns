@@ -1,17 +1,31 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, TextInput, Image, Button, StyleSheet, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 // Importamos useLocalSearchParams para obtener los parámetros locales de la ruta
 import { useLocalSearchParams } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = () => {
-  const { profileImage: initialImage, name: initialName } = useLocalSearchParams() as { profileImage: string; name: string };
-  const { user, token } = useContext(AuthContext);
+  const { user, setUser, token } = useContext(AuthContext);
   const userId = user?._id;
-  const [image, setImage] = useState(initialImage);
-  const [nombre, setNombre] = useState(initialName);
+  const [image, setImage] = useState(user?.profilePicture);
+  const [nombre, setNombre] = useState(user?.username);
   const [correo, setCorreo] = useState('');
+
+  useEffect(() => {
+    const loadProfileImage = async () => {
+      try {
+        const storedImage = await AsyncStorage.getItem('profilePicture');
+        if (storedImage) {
+          setImage(storedImage);
+        }
+      } catch (error) {
+        console.error('Error al cargar la imagen de AsyncStorage:', error);
+      }
+    };
+    loadProfileImage();
+  }, []);
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -44,6 +58,7 @@ const ProfileScreen = () => {
     let match = filename ? /\.(\w+)$/.exec(filename) : null;
     let type = match ? `image/${match[1]}` : `image/jpeg`;
 
+
     // Crear el objeto FormData y anexar la imagen y el userId
     let formData = new FormData();
     formData.append('profilePicture', {
@@ -60,7 +75,7 @@ const ProfileScreen = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/profile/upload-profile-picture', {
+      const response = await fetch('http://192.168.1.215:3000/api/profile/upload-profile-picture', {
         method: 'POST',
         body: formData,
       });
@@ -68,6 +83,13 @@ const ProfileScreen = () => {
       if (response.ok) {
         Alert.alert('Éxito', 'Imagen de perfil actualizada correctamente');
         console.log('Respuesta del servidor:', data);
+
+        //actualizar el contexto
+        setUser({
+          ...user,
+          profilePicture: localUri,
+        });
+        
       } else {
         Alert.alert('Error', data.msg || 'Error al subir la imagen');
         console.error('Error del servidor:', data);
