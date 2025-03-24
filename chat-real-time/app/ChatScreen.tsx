@@ -1,28 +1,26 @@
-import React, { useLayoutEffect, useState, useContext, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import React, { useLayoutEffect, useState, useContext, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Image } from 'react-native';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
-import { ProfileImage, UserName } from '@/components/chatComponents/ChatHeader';
-import IconButtons from '@/components/chatComponents/IconButtons';
-import { AuthContext } from '@/context/AuthContext';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import axios from 'axios';
-import io from 'socket.io-client';
+import { AuthContext } from '@/context/AuthContext';
+import chatMediator from '@/mediators/ChatMediator';
+import IconButtons from '@/components/chatComponents/IconButtons';
 
 const ChatScreen = () => {
   const { name, profileImage } = useLocalSearchParams() as { name: string; profileImage: string };
-  const router = useRouter();
   const navigation = useNavigation();
-
+  const router = useRouter();
   const { user } = useContext(AuthContext);
   const UserID = user?._id;
 
+  // Define el ID de conversación (puede venir de params o ser fijo)
   const conversationId = "67df66fc8feaf861786757f3";
 
-  const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
+  const [message, setMessage] = useState('');
 
-  const socketRef = useRef<any>(null);
-
+  // Carga inicial de mensajes desde el backend con axios
   useEffect(() => {
     const loadMessages = async () => {
       try {
@@ -37,34 +35,7 @@ const ChatScreen = () => {
     loadMessages();
   }, [conversationId]);
 
-  useEffect(() => {
-    const socket = io("http://192.168.1.215:3000");
-    socketRef.current = socket;
-
-    socket.emit("joinConversation", conversationId);
-
-    socket.on("receiveMessage", (data: any) => {
-      setMessages(prevMessages => [...prevMessages, data]);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [conversationId]);
-
-  const sendMessage = () => {
-    if (message.trim().length > 0 && socketRef.current) {
-      const messagePayload = {
-        conversationId,
-        sender: UserID,
-        content: message,
-        type: "text"
-      };
-      socketRef.current.emit("sendMessage", messagePayload);
-      setMessage('');
-    }
-  };  
-
+  // Configuración del header con useLayoutEffect
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -72,8 +43,8 @@ const ChatScreen = () => {
       headerTintColor: 'black',
       headerTitle: () => (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <ProfileImage uri={profileImage} style={{ width: 40, height: 40, borderRadius: 20 }} />
-          <UserName name={name} style={{ marginLeft: 10, fontSize: 18, fontWeight: 'bold' }} />
+          <Image source={{ uri: profileImage }} style={{ width: 40, height: 40, borderRadius: 20 }} />
+          <Text style={{ marginLeft: 10, fontSize: 18, fontWeight: 'bold' }}>{name}</Text>
         </View>
       ),
       headerLeft: () => (
@@ -85,11 +56,66 @@ const ChatScreen = () => {
     });
   }, [navigation, name, profileImage]);
 
+  // Función para enviar mensaje con ID temporal
+const sendMessage = () => {
+  if (message.trim().length > 0) {
+    const tempId = `temp-${Date.now()}`;
+    const tempMessage = {
+      conversationId,
+      sender: UserID ?? '',
+      content: message,
+      type: 'text',
+      _id: tempId,
+      isTemp: true, // Flag temporal para identificar
+    };
+    // Actualización optimista
+    setMessages(prevMessages => [...prevMessages, tempMessage]);
+    chatMediator.sendMessage(conversationId, UserID ?? '', message);
+    setMessage('');
+  }
+};
+
+// Listener del mediator para manejar mensajes entrantes
+useEffect(() => {
+  chatMediator.joinConversation(conversationId);
+
+  const mediatorListener = (data: any) => {
+    // Asegurarse de trabajar con objeto plano
+    const plainMessage = data._doc ? data._doc : data;
+    if (plainMessage.conversationId === conversationId) {
+      setMessages(prevMessages => {
+        // Si existe un mensaje temporal con el mismo contenido o similar, lo reemplazamos.
+        const tempIndex = prevMessages.findIndex(
+          msg => msg.isTemp && msg.content === plainMessage.content && msg.sender === plainMessage.sender
+        );
+        if (tempIndex !== -1) {
+          // Reemplazar el mensaje temporal por el definitivo
+          const updatedMessages = [...prevMessages];
+          updatedMessages[tempIndex] = plainMessage;
+          return updatedMessages;
+        }
+        // Si no, agregar el mensaje
+        // Evitar duplicados comprobando el _id
+        if (prevMessages.some(msg => msg._id === plainMessage._id)) {
+          return prevMessages;
+        }
+        return [...prevMessages, plainMessage];
+      });
+    }
+  };
+
+  chatMediator.subscribe(mediatorListener);
+  return () => {
+    chatMediator.unsubscribe(mediatorListener);
+  };
+}, [conversationId]);
+
+
   return (
     <View style={styles.container}>
       <FlatList
         data={messages}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item) => item._id ? item._id.toString() : Math.random().toString()}
         renderItem={({ item }) => (
           <View style={[styles.messageContainer, item.sender === UserID ? styles.myMessage : styles.otherMessage]}>
             <Text style={styles.messageText}>{item.content}</Text>
