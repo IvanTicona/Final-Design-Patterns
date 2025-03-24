@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'r
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 
 import axios from 'axios';
-import io from 'socket.io-client';
+import { getSocket } from "../utils/socket";
 
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { ProfileImage, UserName } from '@/components/chatComponents/ChatHeader';
@@ -38,7 +38,7 @@ const ChatScreen = () => {
   }, [conversationId]);
 
   useEffect(() => {
-    const socket = io(env.SERVER);
+    const socket = getSocket();
     socketRef.current = socket;
 
     socket.emit("joinConversation", conversationId);

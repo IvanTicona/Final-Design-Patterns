@@ -1,13 +1,11 @@
-import { io, Socket } from "socket.io-client";
+import { getSocket } from "../utils/socket";
 import { env } from "@/constants/environment";
 
 class ChatMediator {
-  private socket: Socket;
+  private socket = getSocket();
   private observers: ((message: any) => void)[] = [];
 
-  constructor(serverUrl: string) {
-    this.socket = io(serverUrl);
-    
+  constructor() {
     // Listener para recibir mensajes y notificar a observadores
     this.socket.on("receiveMessage", (message) => {
       console.log("Mediator: received message", message);
@@ -40,5 +38,5 @@ class ChatMediator {
   }
 }
 
-const chatMediator = new ChatMediator(`${env.SERVER}`);
+const chatMediator = new ChatMediator();
 export default chatMediator;
