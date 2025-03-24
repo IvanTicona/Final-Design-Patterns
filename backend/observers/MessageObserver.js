@@ -17,6 +17,7 @@ class MessageObserver {
       const conversation = await this.invoker.executeCommand(command);
       const lastMessage = conversation.messages[conversation.messages.length - 1];
       // Convertimos a objeto plano y añadimos conversationId
+      // Convertimos a objeto plano y añadimos conversationId
       const messageToSend = { ...lastMessage.toObject(), conversationId };
       this.chatServer.io.to(conversationId).emit('receiveMessage', messageToSend);
       

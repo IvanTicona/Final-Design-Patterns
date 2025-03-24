@@ -3,8 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
-import { env } from '../constants/environment';
-import Config from 'react-native-config';
+import { env } from '@/constants/environment';
 
 const AuthScreen: React.FC = () => {
 
