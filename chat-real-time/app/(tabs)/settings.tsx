@@ -12,10 +12,11 @@ const SettingsScreen = () => {
 
   const handleProfilePress = () => {
     router.push({
-      pathname: '/ProfileScreen',  
+      pathname: '/ProfileScreen',
       params: {
         name: user?.username,
-        profileImage: user?.profilePicture, 
+        profileImage: (user?.profilePicture.length === 0) ?
+          "https://mychatrealtimebucket.s3.us-east-1.amazonaws.com/profilePictureEmpty.jpg" : user?.profilePicture, 
       },
     });
   };
@@ -51,7 +52,8 @@ const SettingsScreen = () => {
       <TouchableOpacity onPress={handleProfilePress}>
         <View style={styles.profileSection}>
             <Image
-            source={{ uri: user?.profilePicture }} // Aquí debes poner la URL de la foto de perfil
+            source={{ uri: (user?.profilePicture.length === 0) ?
+              "https://mychatrealtimebucket.s3.us-east-1.amazonaws.com/profilePictureEmpty.jpg" : user?.profilePicture }} // Aquí debes poner la URL de la foto de perfil
             style={styles.profileImage}
             />
             <View style={styles.profileInfo}>

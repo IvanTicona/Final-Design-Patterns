@@ -23,8 +23,9 @@ exports.uploadProfilePicture = async (req, res) => {
       return res.status(404).json({ msg: 'Usuario no encontrado' });
     }
 
-    res.status(201).json({ msg: 'Imagen de perfil actualizada correctamente', user: updatedUser });
+    return res.status(201).json({ msg: 'Imagen de perfil actualizada correctamente', user: updatedUser });
   } catch (error) {
-    res.status(500).json({ msg: 'Error interno del servidor' });
+    console.error('Error interno al actualizar la imagen de perfil:', error);
+    return res.status(500).json({ msg: 'Error interno del servidor' });
   }
 };

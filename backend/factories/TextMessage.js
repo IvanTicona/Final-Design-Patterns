@@ -4,7 +4,6 @@ class TextMessage extends Message {
   constructor(options) {
     super({ ...options, type: 'text' });
   }
-
   getType() {
     return 'text';
   }

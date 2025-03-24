@@ -4,7 +4,6 @@ class ImageMessage extends Message {
   constructor(options) {
     super({ ...options, type: 'image' });
   }
-
   getType() {
     return 'image';
   }

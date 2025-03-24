@@ -2,8 +2,8 @@ const FileStrategy = require('./FileStrategy');
 
 class AudioStrategy extends FileStrategy {
   processFile(file) {
-    // Lógica para validar o transcodificar audio.
     console.log("Processing audio file...");
+    // Lógica para validar/transcodificar audio
     return file;
   }
 }

@@ -4,17 +4,9 @@ const http = require('http');
 const cors = require('cors');
 const socketIo = require('socket.io');
 const mongoose = require('mongoose');
+const connectDB = require('./config/db');
 
-// Conexión a MongoDB
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('Conexión a MongoDB exitosa');
-  } catch (error) {
-    console.error('Error conectando a MongoDB:', error);
-    process.exit(1);
-  }
-};
+// Conectar a MongoDB
 connectDB();
 
 // Configurar Express
@@ -22,10 +14,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Rutas: autenticación, conversaciones, archivos, etc.
-app.use('/api/auth', require('./routes/auth')); // tu implementación existente de auth
-app.use('/api/conversations', require('./routes/conversations')); // endpoints de conversaciones
-app.use('/api/file', require('./routes/file')); // endpoint para procesar archivos
+// Rutas
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/conversations', require('./routes/conversations'));
+app.use('/api/file', require('./routes/file'));
+app.use('/api/profile', require('./routes/profile')); // [Cambio] se incluye la ruta de perfil
 
 app.get('/', (req, res) => {
   res.send('API de Chat en Tiempo Real está corriendo');

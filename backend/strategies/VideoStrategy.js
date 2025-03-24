@@ -2,8 +2,8 @@ const FileStrategy = require('./FileStrategy');
 
 class VideoStrategy extends FileStrategy {
   processFile(file) {
-    // Lógica para validar, comprimir o transcodificar videos.
     console.log("Processing video file...");
+    // Lógica para validar/transcodificar videos
     return file;
   }
 }

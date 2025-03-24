@@ -5,7 +5,6 @@ class AudioMessage extends Message {
     super({ ...options, type: 'audio' });
     this.duration = options.duration || 0;
   }
-
   getType() {
     return 'audio';
   }

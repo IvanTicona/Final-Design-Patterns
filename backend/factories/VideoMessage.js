@@ -5,7 +5,6 @@ class VideoMessage extends Message {
     super({ ...options, type: 'video' });
     this.resolution = options.resolution || '720p';
   }
-
   getType() {
     return 'video';
   }
