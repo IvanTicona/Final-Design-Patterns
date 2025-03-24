@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
-import Config from 'react-native-config';
+import { env } from '@/constants/environment';
 
 const AuthScreen: React.FC = () => {
 
@@ -16,7 +16,7 @@ const AuthScreen: React.FC = () => {
   const handleAuth = async () => {
     const endpoint = isRegister ? 'register' : 'login';
     try {
-      const response = await axios.post(`http://192.168.1.215:3000/api/auth/${endpoint}`, {
+      const response = await axios.post(`${env.API_AUTH}/${endpoint}`, {
         username: username.trim(),
         email: email.trim(),
         password: password.trim(),
