@@ -6,9 +6,10 @@ import { AuthContext } from '@/context/AuthContext';
 interface ChatComponentProps {
   profilePicture: string;
   username: string;
+  conversationId: string;
 }
 
-const ChatComponent: React.FC<ChatComponentProps> = ({ profilePicture, username }) => {
+const ChatComponent: React.FC<ChatComponentProps> = ({ profilePicture, username, conversationId }) => {
   const router = useRouter();
   const { user } = useContext(AuthContext);
 
@@ -17,7 +18,8 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ profilePicture, username 
       pathname: '/ChatScreen',
       params: {
         name: username,
-        profileImage: profilePicture, 
+        profileImage: profilePicture,
+        conversationId,        
       },
     });
   };

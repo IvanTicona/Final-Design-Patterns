@@ -1,22 +1,22 @@
 import React, { useLayoutEffect, useState, useContext, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { Ionicons, FontAwesome } from '@expo/vector-icons';
-import { ProfileImage, UserName } from '@/components/chatComponents/ChatHeader';
-import IconButtons from '@/components/chatComponents/IconButtons';
-import { AuthContext } from '@/context/AuthContext';
+
 import axios from 'axios';
 import io from 'socket.io-client';
 
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
+import { ProfileImage, UserName } from '@/components/chatComponents/ChatHeader';
+import { AuthContext } from '@/context/AuthContext';
+import IconButtons from '@/components/chatComponents/IconButtons';
+import { env } from '@/constants/environment';
+
 const ChatScreen = () => {
-  const { name, profileImage } = useLocalSearchParams() as { name: string; profileImage: string };
+    
   const router = useRouter();
   const navigation = useNavigation();
-
   const { user } = useContext(AuthContext);
-  const UserID = user?._id;
-
-  const conversationId = "67df66fc8feaf861786757f3";
+  const { name, profileImage, conversationId } = useLocalSearchParams() as { name: string; profileImage: string, conversationId: string };
 
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
@@ -26,7 +26,7 @@ const ChatScreen = () => {
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.215:3000/api/conversations/conversation/${conversationId}`);
+        const response = await axios.get(`${env.API_CONVERSATION}/conversation/${conversationId}`);
         const messagesFromData = response.data.messages;
         setMessages(messagesFromData);
       } catch (error) {
@@ -38,7 +38,7 @@ const ChatScreen = () => {
   }, [conversationId]);
 
   useEffect(() => {
-    const socket = io("http://192.168.1.215:3000");
+    const socket = io(env.SERVER);
     socketRef.current = socket;
 
     socket.emit("joinConversation", conversationId);
@@ -56,7 +56,7 @@ const ChatScreen = () => {
     if (message.trim().length > 0 && socketRef.current) {
       const messagePayload = {
         conversationId,
-        sender: UserID,
+        sender: user?._id,
         content: message,
         type: "text"
       };
@@ -91,7 +91,7 @@ const ChatScreen = () => {
         data={messages}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <View style={[styles.messageContainer, item.sender === UserID ? styles.myMessage : styles.otherMessage]}>
+          <View style={[styles.messageContainer, item.sender === user?._id ? styles.myMessage : styles.otherMessage]}>
             <Text style={styles.messageText}>{item.content}</Text>
           </View>
         )}

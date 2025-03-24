@@ -19,13 +19,14 @@ export default function HomeScreen() {
 
     const loadChats = async () => {
       try{
-        const response = await axios.get('http://192.168.1.215:3000/api/conversations/67df11d424b330e27b543841');
+        const response = await axios.get('http://192.168.0.17:3000/api/conversations/67df11d424b330e27b543841');
         const savedChats = response.data.map((conv: any) => {
           const otherParticipant = conv.participants.find(
             (participant: any) => participant._id.toString() !== user?._id.toString()
           );
           return {
-            conversationId: otherParticipant._id,
+            conversationId: conv._id,
+            participantId: otherParticipant._id,
             participant: otherParticipant.username,
             // lastMessage: otherParticipant.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null,
             // updatedAt: otherParticipant.updatedAt
@@ -54,7 +55,12 @@ export default function HomeScreen() {
         {
           chats.map((chat: any) => {
             return(
-            <ChatComponent key={chat.conversationId} profilePicture={chat.profileImage} username={chat.participant} />
+            <ChatComponent 
+              key={chat.participantId}
+              conversationId={chat.conversationId}
+              profilePicture={chat.profileImage} 
+              username={chat.participant}
+            />
           )})
         }
       </View>
